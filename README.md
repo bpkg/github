@@ -6,7 +6,7 @@ Github API from the command line
 ## install
 
 ```sh
-$ [sudo] bpkg install github -g
+$ bpkg install github
 ```
 
 ## usage
