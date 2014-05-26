@@ -23,14 +23,20 @@ github_request () {
   shift
 
   ## pass the rest to curl
-  cargs="${args}"
+  cargs="${@}"
 
   ## read token
   token="$(github token get)"
 
   ## if found then append to uri
   if [ ! -z "${token}" ]; then
-    uri+="?access_token=${token}"
+    if [[ ${uri} = *\?* ]]; then
+      uri+='\&'
+    else
+      uri+="?"
+    fi
+
+    uri+="access_token=${token}"
   fi
 
   ## build url
@@ -41,13 +47,15 @@ github_request () {
   fi
 
   ## curl args
-  cargs+="-s"
+  cargs+=" -s"
 
   ## build command
-  cmd="curl -X "${method}" "${url}" "${cargs}""
+  cmd="curl -X "${method}" ${url} "${cargs}""
+  ## trim
+  cmd="$(echo "${cmd}" | tr -d '\n')"
 
   ## request
-  ${cmd}
+  ( eval "${cmd}" )
   return $?
 }
 

@@ -6,7 +6,6 @@ source `which github-common`
 usage () {
   echo "usage: github-authorization [-h]"
   echo "   or: github-authorization <username> [password]"
-  echo "   or: github-authorization <token> -a|--oauth"
 }
 
 ## main
@@ -16,6 +15,7 @@ github_authorization () {
   local pass=""
   local cflags=""
   local cargs=""
+  local token=""
 
   for opt in ${@}; do
     case "${opt}" in
@@ -50,48 +50,36 @@ github_authorization () {
     cargs="${user}:${pass}"
   fi
 
-  ## append oauth part
-  if [ "1" = "${use_oauth}" ]; then
-    cargs+=":x-oauth-basic"
-  fi
-
-  ## build cmd
-  cmd="curl ${cflags} ${cargs} "${GH_AUTH_URL}""
-
-  ## request
-  ${cmd} | github json -b | {
+  ## try getting a token with basic auth
+  github request POST '/authorizations' "${cflags} ${cargs} -d '{ \
+    \"description\":    \"bpkg/github(1) authentication\",        \
+    \"client_id\":      \"${GH_CLIENT_ID}\",                      \
+    \"client_secret\":  \"${GH_CLIENT_SECRET}\"                   \
+  }'" | github json -b | {
     while read -r buf; do
-      local key=""
-      local val=""
-
       ## read key
       key="$(echo ${buf} | awk '{ print $1 }' | tr -d '\[\"]' | tr ',' '.' )"
       val="$(echo ${buf} | awk '{$1=""; print $0 }' | tr -d '\"')"
 
       ## trim
-      key="$(echo ${key} | sed -e 's/^ *//' -e 's/ *$//')"
       val="$(echo ${val} | sed -e 's/^ *//' -e 's/ *$//')"
+      key="$(echo ${key} | sed -e 's/^ *//' -e 's/ *$//')"
 
       case "${key}" in
-        message)
+        message|error)
+          echo >&2
           echo >&2 "  error: ${val}"
           return 1
           ;;
 
-        ## key to look for signaling valid
-        ## authentication
-        login)
-          if [ "1" = "${use_oauth}" ]; then
-            echo >&2 "  info: Storing access token"
-            github token set "${user}"
-          fi
+        token)
+          token="${val}"
+          github token set ${token}
+          echo ${token}
           return $?
           ;;
       esac
     done
-
-    ## consider a failure if reached
-    return 1
   }
 
   return $?

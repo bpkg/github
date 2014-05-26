@@ -1,6 +1,10 @@
 #!/bin/bash
 
 source `which github-common`
+source `which github-init`
+source `which github-json`
+source `which github-token`
+source `which github-request`
 source `which github-authorization`
 
 ## github version
