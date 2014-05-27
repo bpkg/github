@@ -32,6 +32,10 @@ github_authorization () {
 
   if [ "-" != "${1:0:1}" ]; then
     user="${1}"
+    if [ -z $user ]; then
+      usage
+      return 1
+    fi
     shift
   fi
 
@@ -69,6 +73,7 @@ github_authorization () {
         message|error)
           echo >&2
           echo >&2 "  error: ${val}"
+          echo >&2
           return 1
           ;;
 
