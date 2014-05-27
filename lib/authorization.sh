@@ -30,6 +30,15 @@ github_authorization () {
     esac
   done
 
+  ## check `git init` has been runned
+  if ! test -d "${GH_DIR}"; then
+    echo >&2
+    echo >&2 '  error: `github init` required'
+    echo >&2
+    return 1
+  fi
+
+  ## check and store input
   if [ "-" != "${1:0:1}" ]; then
     user="${1}"
     if [ -z $user ]; then
