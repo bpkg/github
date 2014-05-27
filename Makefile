@@ -1,7 +1,7 @@
 
 BIN ?= github
 PREFIX ?= /usr/local
-CMDS = json authorization common events init json request token
+CMDS = json authorization common events init json request token gist
 
 install: uninstall
 	install $(BIN) $(PREFIX)/bin
