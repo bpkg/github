@@ -47,10 +47,11 @@ github_request () {
   fi
 
   ## curl args
-  cargs+=" -s"
+  cargs+=" -snL"
 
   ## build command
   cmd="curl -X "${method}" ${url} "${cargs}""
+
   ## trim
   cmd="$(echo "${cmd}" | tr -d '\n')"
 

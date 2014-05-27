@@ -55,6 +55,8 @@ github () {
       if type -f "${cmd}" > /dev/null 2>&1; then
         "${cmd}" "${@}"
         return $?
+      else
+        return 1
       fi
       ;;
   esac

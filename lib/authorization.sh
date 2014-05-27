@@ -13,7 +13,6 @@ github_authorization () {
   local let use_oauth=0
   local user=""
   local pass=""
-  local cflags=""
   local cargs=""
   local token=""
 
@@ -41,10 +40,6 @@ github_authorization () {
   ## check and store input
   if [ "-" != "${1:0:1}" ]; then
     user="${1}"
-    if [ -z $user ]; then
-      usage
-      return 1
-    fi
     shift
   fi
 
@@ -53,9 +48,6 @@ github_authorization () {
     shift
   fi
 
-  ## curl flags
-  cflags="-sLu"
-
   ## curl args
   if [ -z "${pass}" ]; then
     cargs="${user}"
@@ -63,8 +55,22 @@ github_authorization () {
     cargs="${user}:${pass}"
   fi
 
+  if [ -z "${GH_CLIENT_ID}" ]; then
+    echo
+    echo >&2 "    error: Environment variable \`GH_CLIENT_ID' is not set"
+    echo
+    return 1
+  fi
+
+  if [ -z "${GH_CLIENT_SECRET}" ]; then
+    echo
+    echo >&2 "    error: Environment variable \`GH_CLIENT_SECRET' is not set"
+    echo
+    return 1
+  fi
+
   ## try getting a token with basic auth
-  github request POST '/authorizations' "${cflags} ${cargs} -d '{ \
+  github request POST '/authorizations' "-u ${cargs} -d '{ \
     \"description\":    \"bpkg/github(1) authentication\",        \
     \"client_id\":      \"${GH_CLIENT_ID}\",                      \
     \"client_secret\":  \"${GH_CLIENT_SECRET}\"                   \

@@ -4,6 +4,7 @@ source `which github-common`
 
 ## output usage
 usage () {
+  echo "usage: github-gist [-h] <op>"
   return 0
 }
 
@@ -25,7 +26,18 @@ github_gist () {
     starred)
       github request GET /gists/starred
       ;;
+
+    -h|--help)
+      usage
+      ;;
+
+    *)
+      usage
+      return 1
+      ;;
   esac
+
+  return $?
 }
 
 ## export
