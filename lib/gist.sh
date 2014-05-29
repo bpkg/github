@@ -31,7 +31,7 @@ github_gist () {
       github request GET /gists/starred
       ;;
 
-    list-commits)
+    commits)
       github request GET /gists/${1}/commits
       ;;
 
@@ -39,19 +39,19 @@ github_gist () {
       github request PUT /gists/${1}/star
       ;;
 
-    unstar)
-      github request DELETE /gists/${1}/star
+    stars)
+      github request GET /gists/${1}/star
       ;;
 
-    check-star)
-      github request GET /gists/${1}/star
+    unstar)
+      github request DELETE /gists/${1}/star
       ;;
 
     fork)
       github request POST /gists/${1}/forks
       ;;
 
-    list-forks)
+    forks)
       github request GET /gists/${1}/forks
       ;;
 
