@@ -19,8 +19,7 @@ github_token () {
       fi
 
       ## purge
-      rm -f "${GH_DIR}/token"
-      touch "${GH_DIR}/token"
+      github token clear
 
       echo "${@}" >> "${GH_DIR}/token"
       ;;
@@ -31,6 +30,11 @@ github_token () {
       fi
 
       cat "${GH_DIR}/token" | xargs echo -n
+      ;;
+
+    clear)
+      rm -f "${GH_DIR}/token"
+      touch "${GH_DIR}/token"
       ;;
 
     *) return 1 ;;
