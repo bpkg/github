@@ -19,12 +19,44 @@ github_gist () {
   fi
 
   case "${op}" in
+    get)
+      github request GET /gists/${1}
+      ;;
+
     list)
       github request GET /gists/public
       ;;
 
     starred)
       github request GET /gists/starred
+      ;;
+
+    list-commits)
+      github request GET /gists/${1}/commits
+      ;;
+
+    star)
+      github request PUT /gists/${1}/star
+      ;;
+
+    unstar)
+      github request DELETE /gists/${1}/star
+      ;;
+
+    check-star)
+      github request GET /gists/${1}/star
+      ;;
+
+    fork)
+      github request POST /gists/${1}/forks
+      ;;
+
+    list-forks)
+      github request GET /gists/${1}/forks
+      ;;
+
+    delete)
+      github request DELETE /gists/${1}
       ;;
 
     -h|--help)
