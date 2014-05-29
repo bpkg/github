@@ -37,6 +37,8 @@ github_request () {
     fi
 
     uri+="access_token=${token}"
+  else
+    cargs+=" -n "
   fi
 
   ## build url
@@ -47,7 +49,7 @@ github_request () {
   fi
 
   ## curl args
-  cargs+=" -snL"
+  cargs+=" -sL"
 
   ## build command
   cmd="curl -X "${method}" ${url} "${cargs}""
