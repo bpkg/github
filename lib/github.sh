@@ -25,7 +25,7 @@ github () {
 
     ## flags
     -V|--version)
-      echo "${VERSION}"
+      log version "${VERSION}"
       return 0
       ;;
 

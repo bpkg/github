@@ -2,10 +2,41 @@
 
 source `which github-common`
 
+UP=$'\033[A'
+DOWN=$'\033[B'
+PAT=0          # Personal access token
+OAUTH2=1       # OAuth2
+
+selected=$PAT
+auth_options=()
+auth_options[$PAT]="Personal access token"
+auth_options[$OAUTH2]="OAuth2(ClientId+ClientSecret)"
+
 ## output usage
 usage () {
   echo "usage: github-authorization [-h]"
   echo "   or: github-authorization <username> [password]"
+}
+
+## switch the auth options
+switch_auth_option () {
+  let "selected = !${selected}"
+}
+
+## display the auth options
+display_auth_option () {
+  echo
+  echo "  Select your auth type:"
+  echo
+  for i in {0..1}; do
+    local desc=${auth_options[$i]}
+    if test "$i" = "$selected"; then
+      printf "  \033[36mο\033[0m $desc\033[0m\n"
+    else
+      printf "    \033[90m$desc\033[0m\n"
+    fi
+  done
+  echo
 }
 
 ## main
@@ -31,10 +62,7 @@ github_authorization () {
 
   ## check `git init` has been runned
   if ! test -d "${GH_DIR}"; then
-    echo >&2
-    echo >&2 '  error: `github init` required'
-    echo >&2
-    return 1
+    abort `github init` required
   fi
 
   ## check and store input
@@ -48,6 +76,24 @@ github_authorization () {
     shift
   fi
 
+  clear
+  display_auth_option $selected
+
+  while true; do
+    read -s -n 3 c
+    case "$c" in
+      $UP|$DOWN)
+        clear
+        switch_auth_option
+        display_auth_option 
+        ;;
+      *)
+        clear
+        break
+        ;;
+    esac
+  done
+
   ## curl args
   if [ -z "${pass}" ]; then
     cargs="${user}"
@@ -55,19 +101,31 @@ github_authorization () {
     cargs="${user}:${pass}"
   fi
 
-  if [ -z "${GH_CLIENT_ID}" ]; then
-    echo
-    echo >&2 "    error: Environment variable \`GH_CLIENT_ID' is not set"
-    echo
-    return 1
-  fi
-
-  if [ -z "${GH_CLIENT_SECRET}" ]; then
-    echo
-    echo >&2 "    error: Environment variable \`GH_CLIENT_SECRET' is not set"
-    echo
-    return 1
-  fi
+  case "$selected" in
+    $OAUTH2)
+      if [ -z "${GH_CLIENT_ID}" ]; then
+        abort "Environment variable \`GH_CLIENT_ID' is not set"
+      fi
+      if [ -z "${GH_CLIENT_SECRET}" ]; then
+        abort "Environment variable \`GH_CLIENT_SECRET' is not set"
+      fi
+      ;;
+    $PAT)
+      if [ -z "${GH_PERSONAL_TOKEN}" ]; then
+        abort "Environment variable \`GH_PERSONAL_TOKEN' is not set"
+      else
+        github token set ${GH_PERSONAL_TOKEN}
+        echo
+        log user ${user}
+        log token ${GH_PERSONAL_TOKEN}
+        echo
+        return $?
+      fi
+      ;;
+    *)
+      abort "Unknown authorization type"
+      ;;
+  esac
 
   ## try getting a token with basic auth
   github request POST '/authorizations' "-u ${cargs} -d '{ \
@@ -86,16 +144,14 @@ github_authorization () {
 
       case "${key}" in
         message|error)
-          echo >&2
-          echo >&2 "  error: ${val}"
-          echo >&2
-          return 1
+          abort "${val}"
           ;;
 
         token)
           token="${val}"
           github token set ${token}
-          echo ${token}
+          log user ${user}
+          log token ${token}
           return $?
           ;;
       esac
