@@ -1,7 +1,7 @@
 {
-  "name": "term",
+  "name": "github",
   "version": "0.0.1",
-  "description": "Terminal utility functions",
+  "description": "Github API from the command line",
   "global": true,
   "install": "make install"
 }
